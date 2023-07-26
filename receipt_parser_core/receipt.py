@@ -85,6 +85,17 @@ class Receipt(object):
             if matches:
                 return line
 
+    def get_triplets(self):
+        list_length = len(self.lines)
+        for i in range(list_length):
+            triplet = self.lines[i]
+            for m in range(1, 3):
+                t_idx = i + m
+                if t_idx >= list_length:
+                    break
+                triplet += self.lines[t_idx]
+            yield triplet
+
     def parse_date(self):
         """
         :return: date
@@ -112,11 +123,15 @@ class Receipt(object):
         stop_words = self.config.get_config("sum_keys", self.market)
         item_format = self.config.get_config("item_format", self.market)
 
-        for line in self.lines:
+        print('Item format: {}'.format(item_format))
+        # for line in self.lines:
+        for line in self.get_triplets():
             parse_stop = None
+            print(line)
             for ignore_word in ignored_words:
                 parse_stop = fnmatch.fnmatch(line, f"*{ignore_word}*")
                 if parse_stop:
+                    print('##### STOPPED: {}'.format(ignore_word))
                     break
 
             if parse_stop:
@@ -125,16 +140,18 @@ class Receipt(object):
             if self.market != "Metro":
                 for stop_word in stop_words:
                     if fnmatch.fnmatch(line, f"*{stop_word}*"):
+                        print('######## STOPPED: {}'.format(stop_word))
                         return items
 
             match = re.search(item_format, line)
             if hasattr(match, 'group'):
                 article_name = match.group(1)
+                article_sum = match.group(2)
 
-                if match.group(2) == "-":
-                    article_sum = "-" + match.group(3).replace(",", ".")
-                else:
-                    article_sum = match.group(3).replace(",", ".")
+                # if match.group(2) == "-":
+                    # article_sum = "-" + match.group(3).replace(",", ".")
+                # else:
+                    # article_sum = match.group(3).replace(",", ".")
             else:
                 continue
 

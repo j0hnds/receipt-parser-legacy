@@ -1,6 +1,6 @@
 # Define the tesseract language
 #
-language: deu
+language: eng
 
 # Where the receipts are stored
 # Receipts should be simple text files
@@ -11,6 +11,14 @@ results_as_json: false
 # Market names roughly ordered by likelihood.
 # Can contain market locations for fuzzy parsing
 markets:
+  Safeway:
+     - safeway
+     - Safeway
+     - SAFEWAY
+  Boyds:
+     - boyds
+     - Boyds
+     - BOYDS
   Colruyt:
      - colruyt
      - Colruyt
@@ -57,13 +65,18 @@ markets:
      - metro
 
 # Sum keys roughly ordered by likelyhood.
+#
+# When scanning for line-items, in the case of any market except 'Metro',
+# if one of these words is found on the line, it will stop scanning for
+# line items.
 sum_keys:
+  - total
+  - balance
   - summe
   - summe eur
   - gesamtbetrag
   - gesantbetrag
   - gesamt
-  - total
   - sum
   - zwischensumme
   - bar
@@ -72,6 +85,13 @@ sum_keys:
   - rusckgeld
   - rückgeld
 
+sum_keys_boyds:
+  - total due
+
+# Used when scanning for receipt line-items. If one of these
+# words exists anywhere on a line in the receipt, the line on
+# which it occurs is skipped. So, useful for cleaning up the
+# receipt. Remember, these can be per-market.
 ignore_keys:
   - mwst
   - kg x
@@ -79,11 +99,19 @@ ignore_keys:
   - stk
   - zw-summe
 
+# This value will be searched out in the 'Total' line and the
+# entire match for the RE will be used as the total. So something
+# like 'SUMME EUR 5,03' will result in '5,03'
 sum_format: '\d+(\.\s?|,\s?|[^a-zA-Z\d])\d{2}'
 
+# Assumes that the item name is the first capture group
+# and the line item cost is the second.
 item_format: '([a-zA-Z].+)\s(-|)((\d|\d{2}),(\d{2}|\d{3}))\s'
 item_format_metro: '[0-9]\s(.*?)\d.()((\d|\d{2})(\,|\.)\d{1,2})\s([A|a]|[B|b])'
+# item_format_boyds: '\d+\s+\d+\.\d{2}\s+\$(\d+\.\d{2})\s+(.*)\s+(.*)(\d+)\s+(\d+\.\d{2})\s+\$(\d+\.\d{2})\s+(.*)\s+(.*)'
+item_format_boyds: '\d+\s+\d+\.\d{2}\s+\$(\d+\.\d{2})\s+(.*)'
 
 # Matches dates like 19.08.15 and 19.08.2015
-date_format: '((\d{2}\.\d{2}\.\d{2,4})|(\d{2,4}\/\d{2}\/\d{2})|(\d{2}\/\d{2}\/\d{4}))'
+date_format: '(\d{1,2}/\d{1,2}/\d{2,4})'
+# date_format: '((\d{2}\.\d{2}\.\d{2,4})|(\d{2,4}\/\d{2}\/\d{2})|(\d{2}\/\d{2}\/\d{4}))'
 

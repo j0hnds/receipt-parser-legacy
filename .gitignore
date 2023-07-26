@@ -1,3 +1,6 @@
+# Vim
+*.swp
+
 img_orig
 txt_old
 preprocessed

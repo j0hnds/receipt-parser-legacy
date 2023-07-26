@@ -4,7 +4,7 @@ install:
 
 .PHONY: parse
 parse:
-	poetry run
+	poetry run python parse.py
 
 .PHONY: import
 import:
